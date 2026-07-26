@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth, signOut } from "@/auth";
 import { db } from "@/lib/db";
 import { addChild, addToothPost, createInvite, revokeInvite } from "./actions";
+import { SendInviteButton } from "./send-invite-button";
 
 function formatCents(cents: number) {
   return (cents / 100).toLocaleString("en-US", {
@@ -216,6 +217,9 @@ export default async function DashboardPage() {
                 <span className="text-xs uppercase text-gray-500">
                   {invite.status}
                 </span>
+                {invite.status === "PENDING" && (
+                  <SendInviteButton familyId={family.id} inviteId={invite.id} />
+                )}
                 {invite.status === "PENDING" && (
                   <form action={revokeInvite.bind(null, family.id, invite.id)}>
                     <button type="submit" className="text-xs underline">

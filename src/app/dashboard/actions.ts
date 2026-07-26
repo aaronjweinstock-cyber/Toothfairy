@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { auth } from "@/auth";
 import { uploadToothPhoto } from "@/lib/photo-upload";
+import { sendInviteEmail } from "@/lib/email";
 import { childSchema, toothPostSchema, inviteSchema } from "@/lib/validation";
 
 const MAX_PHOTO_BYTES = 8 * 1024 * 1024; // 8MB
@@ -119,4 +120,36 @@ export async function revokeInvite(familyId: string, inviteId: string) {
   });
 
   revalidatePath("/dashboard");
+}
+
+// Real sending requires a Resend-verified domain (a *.vercel.app deploy
+// can't be verified for DNS). Until EMAIL_SENDING_ENABLED=true, this is a
+// no-op -- the dashboard already shows/copies the link, so there's nothing
+// else to do -- rather than attempting a Resend send that would only
+// reach the account owner (sandbox mode) and silently fail everyone else.
+export async function sendInvite(
+  familyId: string,
+  inviteId: string
+): Promise<{ sent: boolean }> {
+  const family = await requireOwnedFamily(familyId);
+
+  const invite = await db.invite.findFirst({
+    where: { id: inviteId, familyId },
+  });
+  if (!invite) {
+    throw new Error("Invite not found");
+  }
+
+  if (process.env.EMAIL_SENDING_ENABLED !== "true") {
+    return { sent: false };
+  }
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  await sendInviteEmail({
+    to: invite.email,
+    familyName: family.name,
+    inviteUrl: `${appUrl}/invite/${invite.token}`,
+  });
+
+  return { sent: true };
 }

@@ -19,6 +19,8 @@ decisions](#product-decisions) below.
   custodial payments in and payouts out.
 - **Vercel Blob** for tooth photo uploads (`src/lib/photo-upload.ts`), with
   **sharp** for resizing + stripping EXIF/GPS metadata server-side.
+- **Resend** for invite emails (`src/lib/email.ts`), gated off by default —
+  see "How it works" below.
 - Deploy target: Vercel.
 
 ## Getting started
@@ -30,6 +32,11 @@ decisions](#product-decisions) below.
    - `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` — from the Stripe
      dashboard (use test-mode keys locally).
    - `NEXT_PUBLIC_APP_URL` — `http://localhost:3000` locally.
+   - `BLOB_READ_WRITE_TOKEN` — optional locally; only needed to actually
+     store tooth photos.
+   - `RESEND_API_KEY` / `RESEND_FROM_EMAIL` / `EMAIL_SENDING_ENABLED` —
+     leave `EMAIL_SENDING_ENABLED=false` until a sending domain is verified
+     in Resend (see "How it works").
 2. Install dependencies and apply the schema:
    ```bash
    npm install
@@ -57,6 +64,13 @@ decisions](#product-decisions) below.
   metadata, and uploaded to Vercel Blob; if `BLOB_READ_WRITE_TOKEN` isn't
   configured (e.g. running locally without a linked Vercel project), the
   post still saves, just without a photo — see `src/lib/photo-upload.ts`.
+- Each invite has a **Send invite** button (`src/lib/email.ts`,
+  `src/app/dashboard/send-invite-button.tsx`). It's a no-op showing "Email
+  sending isn't set up yet" until `EMAIL_SENDING_ENABLED=true` — Resend (like
+  any transactional email provider) requires a verified sending domain to
+  deliver to real recipients, and no domain is owned yet. Until then the
+  invite link shown/copyable in the dashboard is the only delivery method.
+  Flipping the flag on later is a config change, not a rebuild.
 - An invited person opens their unique `/invite/[token]` link (no account
   needed) and can send a **Gift** against a tooth post via Stripe Checkout —
   `src/app/invite/[token]/`, `src/app/api/gifts/route.ts`.
@@ -113,6 +127,24 @@ a final design — see open questions below.
   hardcodes a 100%-to-parent assumption that would be awkward to unwind.
 - **Hosting**: Vercel on the default `*.vercel.app` subdomain — no custom
   domain yet (one will be added later solely for outbound email sending).
+
+## Status
+
+All three v3-handoff work items are done and locally verified: Auth.js
+migration, tooth photo upload, and invite email (gated). Not yet deployed —
+see below for what deployment needs.
+
+## What deployment will need
+
+- A production `DATABASE_URL` (Supabase project is provisioned; connection
+  string still needs to be plugged in).
+- Stripe keys — test-mode only for now; no real legal/compliance review has
+  happened yet (see Compliance notes above), so live keys are a deliberate
+  later step, not part of this pass.
+- `BLOB_READ_WRITE_TOKEN`, generated automatically once a Blob store is
+  added to the Vercel project.
+- Resend stays off (`EMAIL_SENDING_ENABLED=false`) until a domain is bought
+  and verified — not a blocker for deploying, just for that one feature.
 
 ## Open questions still outstanding
 
