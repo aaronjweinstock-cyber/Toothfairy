@@ -17,6 +17,8 @@ decisions](#product-decisions) below.
   migration. Still beta-tagged upstream as of this writing.
 - **Stripe Connect** (Express accounts, destination charges via Checkout) for
   custodial payments in and payouts out.
+- **Vercel Blob** for tooth photo uploads (`src/lib/photo-upload.ts`), with
+  **sharp** for resizing + stripping EXIF/GPS metadata server-side.
 - Deploy target: Vercel.
 
 ## Getting started
@@ -49,7 +51,12 @@ decisions](#product-decisions) below.
   signs them in through Auth.js's Credentials provider (`src/auth.ts`).
   Login/logout and route protection (`src/proxy.ts`) go through Auth.js.
 - The parent adds a **Child**, then posts a **ToothPost** when a tooth is
-  lost, and can **Invite** specific people by email — `src/app/dashboard/`.
+  lost (optionally attaching a photo of the tooth — not the child, there's a
+  warning in the UI about that), and can **Invite** specific people by
+  email — `src/app/dashboard/`. Photos are resized, stripped of EXIF/GPS
+  metadata, and uploaded to Vercel Blob; if `BLOB_READ_WRITE_TOKEN` isn't
+  configured (e.g. running locally without a linked Vercel project), the
+  post still saves, just without a photo — see `src/lib/photo-upload.ts`.
 - An invited person opens their unique `/invite/[token]` link (no account
   needed) and can send a **Gift** against a tooth post via Stripe Checkout —
   `src/app/invite/[token]/`, `src/app/api/gifts/route.ts`.

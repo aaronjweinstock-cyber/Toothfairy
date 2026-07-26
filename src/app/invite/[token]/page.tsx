@@ -62,6 +62,14 @@ export default async function InvitePage({
                   received
                 </span>
               </div>
+              {post.photoUrl && (
+                // eslint-disable-next-line @next/next/no-img-element -- external Blob URL, not worth next/image config for a scaffold
+                <img
+                  src={post.photoUrl}
+                  alt="The lost tooth"
+                  className="max-h-64 w-auto rounded object-contain"
+                />
+              )}
               <GiftForm toothPostId={post.id} inviteToken={token} />
             </div>
           );

@@ -91,19 +91,34 @@ export default async function DashboardPage() {
           >
             <h3 className="font-medium">{child.name}</h3>
 
-            <form action={addToothPost.bind(null, family.id)} className="flex gap-2">
+            <form
+              action={addToothPost.bind(null, family.id)}
+              className="flex flex-col gap-2"
+            >
               <input type="hidden" name="childId" value={child.id} />
-              <input
-                name="note"
-                placeholder="Lost a tooth! (optional note)"
-                className="flex-1 rounded border border-black/10 px-3 py-2 text-sm dark:border-white/20"
-              />
-              <button
-                type="submit"
-                className="rounded-full border border-black/10 px-4 py-2 text-sm font-medium dark:border-white/20"
-              >
-                Post
-              </button>
+              <div className="flex gap-2">
+                <input
+                  name="note"
+                  placeholder="Lost a tooth! (optional note)"
+                  className="flex-1 rounded border border-black/10 px-3 py-2 text-sm dark:border-white/20"
+                />
+                <button
+                  type="submit"
+                  className="rounded-full border border-black/10 px-4 py-2 text-sm font-medium dark:border-white/20"
+                >
+                  Post
+                </button>
+              </div>
+              <label className="flex flex-col gap-1 text-xs text-gray-500">
+                Photo of the tooth (optional) — please don&apos;t include
+                photos of your child, just the tooth or note works great!
+                <input
+                  type="file"
+                  name="photo"
+                  accept="image/*"
+                  className="text-xs"
+                />
+              </label>
             </form>
 
             <ul className="flex flex-col gap-2">
@@ -114,12 +129,20 @@ export default async function DashboardPage() {
                 return (
                   <li
                     key={post.id}
-                    className="rounded bg-black/5 p-3 text-sm dark:bg-white/10"
+                    className="flex flex-col gap-2 rounded bg-black/5 p-3 text-sm dark:bg-white/10"
                   >
                     <div className="flex items-center justify-between">
                       <span>{post.note || "Lost a tooth"}</span>
                       <span className="font-medium">{formatCents(total)} received</span>
                     </div>
+                    {post.photoUrl && (
+                      // eslint-disable-next-line @next/next/no-img-element -- external Blob URL, not worth next/image config for a scaffold
+                      <img
+                        src={post.photoUrl}
+                        alt="The lost tooth"
+                        className="max-h-48 w-auto rounded object-contain"
+                      />
+                    )}
                   </li>
                 );
               })}

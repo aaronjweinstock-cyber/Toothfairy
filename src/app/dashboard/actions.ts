@@ -3,7 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { auth } from "@/auth";
+import { uploadToothPhoto } from "@/lib/photo-upload";
 import { childSchema, toothPostSchema, inviteSchema } from "@/lib/validation";
+
+const MAX_PHOTO_BYTES = 8 * 1024 * 1024; // 8MB
 
 async function requireOwnedFamily(familyId: string) {
   const session = await auth();
@@ -62,12 +65,27 @@ export async function addToothPost(familyId: string, formData: FormData) {
     throw new Error("Child not found");
   }
 
-  await db.toothPost.create({
+  const photo = formData.get("photo");
+  if (photo instanceof File && photo.size > MAX_PHOTO_BYTES) {
+    throw new Error("Photo is too large (max 8MB)");
+  }
+
+  const toothPost = await db.toothPost.create({
     data: {
       childId: child.id,
       note: parsed.data.note,
     },
   });
+
+  if (photo instanceof File && photo.size > 0) {
+    const photoUrl = await uploadToothPhoto(photo, toothPost.id);
+    if (photoUrl) {
+      await db.toothPost.update({
+        where: { id: toothPost.id },
+        data: { photoUrl },
+      });
+    }
+  }
 
   revalidatePath("/dashboard");
 }
