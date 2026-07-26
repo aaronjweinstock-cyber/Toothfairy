@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -15,22 +16,32 @@ export default function SignupPage() {
     setSubmitting(true);
 
     const form = new FormData(event.currentTarget);
+    const email = form.get("email");
+    const password = form.get("password");
+
     const res = await fetch("/api/auth/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         name: form.get("name"),
-        email: form.get("email"),
-        password: form.get("password"),
+        email,
+        password,
         familyName: form.get("familyName"),
       }),
     });
 
-    setSubmitting(false);
-
     if (!res.ok) {
+      setSubmitting(false);
       const data = await res.json().catch(() => ({}));
       setError(data.error ?? "Something went wrong");
+      return;
+    }
+
+    const result = await signIn("credentials", { email, password, redirect: false });
+    setSubmitting(false);
+
+    if (result?.error) {
+      setError("Account created, but logging in failed — try logging in.");
       return;
     }
 

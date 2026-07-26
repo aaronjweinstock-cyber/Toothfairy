@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
-import { createSession } from "@/lib/auth";
 import { signupSchema } from "@/lib/validation";
 
 export async function POST(request: Request) {
@@ -27,7 +26,7 @@ export async function POST(request: Request) {
 
   const passwordHash = await bcrypt.hash(password, 12);
 
-  const user = await db.user.create({
+  await db.user.create({
     data: {
       name,
       email,
@@ -38,7 +37,8 @@ export async function POST(request: Request) {
     },
   });
 
-  await createSession(user.id);
-
+  // Account is created; the client signs the user in via next-auth's
+  // Credentials flow (see signup/page.tsx) rather than this route setting
+  // a session directly.
   return NextResponse.json({ ok: true });
 }

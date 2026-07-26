@@ -11,6 +11,10 @@ decisions](#product-decisions) below.
   `proxy.ts` ("Proxy"); see `src/proxy.ts`.
 - **Postgres** via **Prisma 7** (`prisma/schema.prisma`) — designed against
   Supabase, but any Postgres connection string works.
+- **Auth.js v5** (`next-auth@beta` + `@auth/prisma-adapter`) — Credentials
+  (email/password) provider today; the Prisma adapter is wired up so OAuth
+  providers and email verification can be added later without a schema
+  migration. Still beta-tagged upstream as of this writing.
 - **Stripe Connect** (Express accounts, destination charges via Checkout) for
   custodial payments in and payouts out.
 - Deploy target: Vercel.
@@ -20,7 +24,7 @@ decisions](#product-decisions) below.
 1. Copy `.env.example` to `.env` and fill in the values:
    - `DATABASE_URL` — a Postgres connection string (e.g. from a Supabase
      project's Database settings).
-   - `SESSION_SECRET` — random string, e.g. `openssl rand -base64 32`.
+   - `AUTH_SECRET` — random string, e.g. `openssl rand -base64 32`.
    - `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` — from the Stripe
      dashboard (use test-mode keys locally).
    - `NEXT_PUBLIC_APP_URL` — `http://localhost:3000` locally.
@@ -40,8 +44,10 @@ decisions](#product-decisions) below.
 
 ## How it works
 
-- A parent signs up (email + password) and, in the same step, creates a
-  **Family** (their closed circle) — see `src/app/api/auth/signup/route.ts`.
+- A parent signs up (email + password) via `src/app/api/auth/signup/route.ts`,
+  which creates a **Family** (their closed circle) in the same step, then
+  signs them in through Auth.js's Credentials provider (`src/auth.ts`).
+  Login/logout and route protection (`src/proxy.ts`) go through Auth.js.
 - The parent adds a **Child**, then posts a **ToothPost** when a tooth is
   lost, and can **Invite** specific people by email — `src/app/dashboard/`.
 - An invited person opens their unique `/invite/[token]` link (no account
@@ -86,21 +92,22 @@ a final design — see open questions below.
   shape); use real secrets only via environment variables in your
   deploy/hosting provider.
 
-## Open questions (not yet decided — see handoff doc)
+## Decisions made since the initial scaffold
 
-The scaffold makes a first pass at each of these; revisit before shipping:
+- **Circle shape**: staying one `Family` per parent account, multiple
+  `Child`ren inside it — not changing.
+- **Invited-member accounts**: invitees stay account-less (name/email typed
+  at gift time) — not changing.
+- **Auth**: migrated from hand-rolled bcrypt+JWT to Auth.js v5 (see Stack
+  above).
+- **Fees**: will eventually take a percentage per gift via Stripe's
+  `application_fee_amount`, not a subscription — deferred until the core
+  product is solid. Not implemented yet; nothing in the Checkout code
+  hardcodes a 100%-to-parent assumption that would be awkward to unwind.
+- **Hosting**: Vercel on the default `*.vercel.app` subdomain — no custom
+  domain yet (one will be added later solely for outbound email sending).
 
-- **Data model specifics** — is a "circle" per-child or per-family (this
-  scaffold does per-family, multiple kids per circle)? Should invited
-  members get accounts, or stay account-less as they are now?
-- **Auth approach** — this scaffold uses email + password (bcrypt hashing,
-  signed JWT session cookie). Consider a real auth library
-  (e.g. Auth.js) before adding OAuth/magic links/MFA.
-- **Tooth-post trigger** — currently just a free-text note; photo upload
-  isn't wired up yet (`ToothPost.photoUrl` exists in the schema but nothing
-  populates it).
-- **Invitee notifications** — invites currently only generate a link shown
-  in the parent's dashboard; no email/SMS is sent yet.
-- **Fee handling** — Checkout currently passes 100% of the gift to the
-  parent's Stripe balance (no `application_fee_amount`). Decide whether the
-  app takes a cut or passes Stripe's processing fees to the sender/parent.
+## Open questions still outstanding
+
+- **Data model**: still just the first draft in `prisma/schema.prisma`
+  beyond the Auth.js tables — revisit as the product grows.

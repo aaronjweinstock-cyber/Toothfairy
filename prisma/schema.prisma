@@ -14,12 +14,14 @@ datasource db {
 // A parent's account. Kids never log in directly (COPPA: no direct data
 // collection from children) — the parent manages everything on their behalf.
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String
-  name         String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  passwordHash  String
+  name          String
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
   // Stripe Connect account used to receive gift payouts.
   stripeAccountId          String  @default("")
@@ -27,7 +29,54 @@ model User {
 
   families Family[]
 
+  // Auth.js (NextAuth) — unused by the Credentials-only flow today (session
+  // strategy is JWT, so Session rows aren't written), but keeps the door
+  // open for OAuth providers / email verification later without a schema
+  // migration then.
+  accounts Account[]
+  sessions Session[]
+
   @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
 }
 
 // A closed circle: one parent, their kid(s), and the specific people that

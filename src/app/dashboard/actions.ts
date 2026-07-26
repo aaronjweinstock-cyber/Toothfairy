@@ -1,15 +1,18 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
-import { requireUser, destroySession } from "@/lib/auth";
+import { auth } from "@/auth";
 import { childSchema, toothPostSchema, inviteSchema } from "@/lib/validation";
 
 async function requireOwnedFamily(familyId: string) {
-  const user = await requireUser();
+  const session = await auth();
+  if (!session?.user) {
+    throw new Error("Not authenticated");
+  }
+
   const family = await db.family.findFirst({
-    where: { id: familyId, ownerId: user.id },
+    where: { id: familyId, ownerId: session.user.id },
   });
   if (!family) {
     throw new Error("Family not found");
@@ -98,9 +101,4 @@ export async function revokeInvite(familyId: string, inviteId: string) {
   });
 
   revalidatePath("/dashboard");
-}
-
-export async function logout() {
-  await destroySession();
-  redirect("/");
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
+import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
@@ -16,20 +17,16 @@ function LoginForm() {
     setSubmitting(true);
 
     const form = new FormData(event.currentTarget);
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: form.get("email"),
-        password: form.get("password"),
-      }),
+    const result = await signIn("credentials", {
+      email: form.get("email"),
+      password: form.get("password"),
+      redirect: false,
     });
 
     setSubmitting(false);
 
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      setError(data.error ?? "Something went wrong");
+    if (result?.error) {
+      setError("Incorrect email or password");
       return;
     }
 

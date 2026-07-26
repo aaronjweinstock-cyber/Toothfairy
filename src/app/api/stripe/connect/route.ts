@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
-import { requireUser } from "@/lib/auth";
+import { auth } from "@/auth";
 import { db } from "@/lib/db";
 import { getStripe } from "@/lib/stripe";
 
 export async function GET(request: Request) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin;
 
-  const user = await requireUser().catch(() => null);
+  const session = await auth();
+  const user = session?.user
+    ? await db.user.findUnique({ where: { id: session.user.id } })
+    : null;
   if (!user) {
     return NextResponse.redirect(new URL("/login", appUrl));
   }

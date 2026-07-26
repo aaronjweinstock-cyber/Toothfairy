@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
-import { requireUser } from "@/lib/auth";
+import { auth, signOut } from "@/auth";
 import { db } from "@/lib/db";
-import { addChild, addToothPost, createInvite, revokeInvite, logout } from "./actions";
+import { addChild, addToothPost, createInvite, revokeInvite } from "./actions";
 
 function formatCents(cents: number) {
   return (cents / 100).toLocaleString("en-US", {
@@ -11,7 +11,12 @@ function formatCents(cents: number) {
 }
 
 export default async function DashboardPage() {
-  const user = await requireUser().catch(() => null);
+  const session = await auth();
+  if (!session?.user) {
+    redirect("/login");
+  }
+
+  const user = await db.user.findUnique({ where: { id: session.user.id } });
   if (!user) {
     redirect("/login");
   }
@@ -46,7 +51,12 @@ export default async function DashboardPage() {
             Signed in as {user.email}
           </p>
         </div>
-        <form action={logout}>
+        <form
+          action={async () => {
+            "use server";
+            await signOut({ redirectTo: "/" });
+          }}
+        >
           <button className="text-sm underline" type="submit">
             Log out
           </button>
