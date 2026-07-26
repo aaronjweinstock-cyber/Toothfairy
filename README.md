@@ -26,8 +26,15 @@ decisions](#product-decisions) below.
 ## Getting started
 
 1. Copy `.env.example` to `.env` and fill in the values:
-   - `DATABASE_URL` — a Postgres connection string (e.g. from a Supabase
-     project's Database settings).
+   - `DATABASE_URL` — a Postgres connection string. On Supabase, use the
+     "Connect" button -> URI -> **transaction pooler (port 6543)**; the app
+     runtime uses this one, via the driver adapter in `src/lib/db.ts`.
+   - `DIRECT_URL` — Supabase's **session pooler (port 5432)** connection
+     string. `prisma migrate`/`db pull`/`studio` need this instead of the
+     transaction pooler above, which doesn't support what migrations
+     require (see `prisma.config.ts`). Optional locally against plain
+     Postgres (no pooler distinction there); falls back to `DATABASE_URL`
+     if unset.
    - `AUTH_SECRET` — random string, e.g. `openssl rand -base64 32`.
    - `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` — from the Stripe
      dashboard (use test-mode keys locally).
@@ -136,8 +143,16 @@ see below for what deployment needs.
 
 ## What deployment will need
 
-- A production `DATABASE_URL` (Supabase project is provisioned; connection
-  string still needs to be plugged in).
+- Production `DATABASE_URL` / `DIRECT_URL` — Supabase project is
+  provisioned and both connection strings are wired in. `prisma migrate
+  deploy` now runs automatically as part of `npm run build` (see
+  `package.json`), so migrations apply on every Vercel deploy without a
+  manual step. This couldn't be tested against the live Supabase instance
+  from the dev sandbox this was built in (its network egress only allows
+  HTTPS, not raw Postgres wire protocol on 5432/6543) — first real deploy
+  is effectively also the first real connectivity test. The connection
+  string was independently verified to parse correctly and `sslmode=require`
+  was added since Supabase's pooler requires SSL.
 - Stripe keys — test-mode only for now; no real legal/compliance review has
   happened yet (see Compliance notes above), so live keys are a deliberate
   later step, not part of this pass.
