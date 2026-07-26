@@ -1,0 +1,127 @@
+// Prisma schema for Toothfairy.
+// See README.md "Data model" section for the reasoning behind these shapes.
+// This is a first draft (see handoff doc "Not yet decided") — expect it to evolve.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// A parent's account. Kids never log in directly (COPPA: no direct data
+// collection from children) — the parent manages everything on their behalf.
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Stripe Connect account used to receive gift payouts.
+  stripeAccountId          String  @default("")
+  stripeOnboardingComplete Boolean @default(false)
+
+  families Family[]
+
+  @@map("users")
+}
+
+// A closed circle: one parent, their kid(s), and the specific people that
+// parent has invited to send gifts. Not a public/open social graph.
+model Family {
+  id        String   @id @default(cuid())
+  name      String
+  ownerId   String
+  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  children Child[]
+  invites  Invite[]
+
+  @@index([ownerId])
+  @@map("families")
+}
+
+model Child {
+  id        String    @id @default(cuid())
+  familyId  String
+  family    Family    @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  name      String
+  birthdate DateTime?
+  createdAt DateTime  @default(now())
+
+  toothPosts ToothPost[]
+
+  @@index([familyId])
+  @@map("children")
+}
+
+// An invitation for a specific person (grandparent, family friend, etc.) to
+// join a family's circle and be able to send gifts. Link/code based, no
+// public discovery.
+model Invite {
+  id         String       @id @default(cuid())
+  familyId   String
+  family     Family       @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  email      String
+  token      String       @unique @default(cuid())
+  status     InviteStatus @default(PENDING)
+  createdAt  DateTime     @default(now())
+  acceptedAt DateTime?
+
+  @@index([familyId])
+  @@map("invites")
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  REVOKED
+}
+
+// A "lost a tooth" post the parent creates for a child. Invited circle
+// members can see it (via their invite link) and send a gift against it.
+model ToothPost {
+  id        String   @id @default(cuid())
+  childId   String
+  child     Child    @relation(fields: [childId], references: [id], onDelete: Cascade)
+  note      String?
+  photoUrl  String?
+  lostAt    DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  gifts Gift[]
+
+  @@index([childId])
+  @@map("tooth_posts")
+}
+
+// A single money gift from an invited circle member, via Stripe Checkout.
+// Funds land in the parent's Stripe Connect balance (custodial — see
+// README "Compliance notes") until withdrawn.
+model Gift {
+  id                      String     @id @default(cuid())
+  toothPostId             String
+  toothPost               ToothPost  @relation(fields: [toothPostId], references: [id], onDelete: Cascade)
+  senderName              String
+  senderEmail             String
+  amountCents             Int
+  stripeCheckoutSessionId String?    @unique
+  stripePaymentIntentId   String?    @unique
+  status                  GiftStatus @default(PENDING)
+  createdAt               DateTime   @default(now())
+
+  @@index([toothPostId])
+  @@map("gifts")
+}
+
+enum GiftStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
