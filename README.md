@@ -138,21 +138,28 @@ a final design — see open questions below.
 ## Status
 
 All three v3-handoff work items are done and locally verified: Auth.js
-migration, tooth photo upload, and invite email (gated). Not yet deployed —
-see below for what deployment needs.
+migration, tooth photo upload, and invite email (gated). Deployed to Vercel
+(`toothfairy-weld.vercel.app`, production branch set to
+`claude/file-contents-review-ti4f7i`) with a working database connection.
 
-## What deployment will need
+## Deploying / production environment notes
 
-- Production `DATABASE_URL` / `DIRECT_URL` — Supabase project is
-  provisioned and both connection strings are wired in. `prisma migrate
-  deploy` now runs automatically as part of `npm run build` (see
-  `package.json`), so migrations apply on every Vercel deploy without a
-  manual step. This couldn't be tested against the live Supabase instance
-  from the dev sandbox this was built in (its network egress only allows
-  HTTPS, not raw Postgres wire protocol on 5432/6543) — first real deploy
-  is effectively also the first real connectivity test. The connection
-  string was independently verified to parse correctly and `sslmode=require`
-  was added since Supabase's pooler requires SSL.
+- Production `DATABASE_URL` / `DIRECT_URL` point at Supabase. `prisma
+  migrate deploy` runs automatically as part of `npm run build` (see
+  `package.json`), so migrations apply on every Vercel deploy with no
+  manual step.
+- **Use `sslmode=no-verify`, not `sslmode=require`**, in both connection
+  strings against Supabase's pooler -- see the note in `.env.example`.
+  `require` failed in production with `P1011: self-signed certificate in
+  certificate chain`, because newer `pg-connection-string` versions treat
+  `require` as full certificate-chain verification, and Supabase's pooler
+  cert isn't in Node's default trust store. `no-verify` still encrypts the
+  connection, it just skips chain verification.
+- This couldn't be caught before the first real deploy: the dev sandbox
+  this was built in only allows outbound HTTPS, not raw Postgres wire
+  protocol, so the connection string could only be verified to *parse*
+  correctly beforehand, not actually connect. Found and fixed via a live
+  deploy + Vercel Runtime Logs round-trip instead.
 - Stripe keys — test-mode only for now; no real legal/compliance review has
   happened yet (see Compliance notes above), so live keys are a deliberate
   later step, not part of this pass.
