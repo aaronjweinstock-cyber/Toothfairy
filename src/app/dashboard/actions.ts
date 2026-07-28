@@ -45,7 +45,7 @@ export async function addChild(familyId: string, formData: FormData) {
     },
   });
 
-  revalidatePath("/dashboard");
+  revalidatePath("/dashboard", "layout");
 }
 
 export async function addToothPost(familyId: string, formData: FormData) {
@@ -88,7 +88,7 @@ export async function addToothPost(familyId: string, formData: FormData) {
     }
   }
 
-  revalidatePath("/dashboard");
+  revalidatePath("/dashboard", "layout");
 }
 
 export async function createInvite(familyId: string, formData: FormData) {
@@ -108,7 +108,7 @@ export async function createInvite(familyId: string, formData: FormData) {
     },
   });
 
-  revalidatePath("/dashboard");
+  revalidatePath("/dashboard", "layout");
 }
 
 export async function revokeInvite(familyId: string, inviteId: string) {
@@ -119,7 +119,7 @@ export async function revokeInvite(familyId: string, inviteId: string) {
     data: { status: "REVOKED" },
   });
 
-  revalidatePath("/dashboard");
+  revalidatePath("/dashboard", "layout");
 }
 
 // Real sending requires a Resend-verified domain (a *.vercel.app deploy

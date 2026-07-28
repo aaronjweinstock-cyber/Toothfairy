@@ -42,6 +42,19 @@ decisions](#product-decisions) below.
   and the dashboard's "Invite your circle" header both use this to make the
   closed-circle concept visible, not just described in text.
 
+## Dashboard navigation
+
+The dashboard is a sidebar-based app shell, not a single long page:
+`src/app/dashboard/layout.tsx` handles auth + renders `src/components/sidebar.tsx`
+(persistent left nav: Overview / Kids / Invites / Payments), and each section
+is its own route (`src/app/dashboard/{page,kids,invites,payments}/page.tsx`)
+sharing that layout. Server actions in `src/app/dashboard/actions.ts` call
+`revalidatePath("/dashboard", "layout")` so a mutation on one page (e.g.
+adding a tooth post) keeps every dashboard page's data fresh, not just the
+one you're on. **Not yet responsive** — the sidebar is a fixed width with no
+mobile collapse/hamburger; worth addressing before this needs to work well
+on a phone.
+
 ## Getting started
 
 1. Copy `.env.example` to `.env` and fill in the values:
