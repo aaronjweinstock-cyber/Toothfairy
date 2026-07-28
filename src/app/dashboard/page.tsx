@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth, signOut } from "@/auth";
 import { db } from "@/lib/db";
+import { refreshStripeOnboardingStatus } from "@/lib/stripe";
 import { addChild, addToothPost, createInvite, revokeInvite } from "./actions";
 import { SendInviteButton } from "./send-invite-button";
 
@@ -41,6 +42,8 @@ export default async function DashboardPage() {
     redirect("/signup");
   }
 
+  const stripeOnboardingComplete = await refreshStripeOnboardingStatus(user);
+
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
   return (
@@ -67,7 +70,7 @@ export default async function DashboardPage() {
       <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-medium">Payouts</h2>
-          {!user.stripeOnboardingComplete && (
+          {!stripeOnboardingComplete && (
             <a
               href="/api/stripe/connect"
               className="rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background"
@@ -77,7 +80,7 @@ export default async function DashboardPage() {
           )}
         </div>
         <p className="text-sm text-gray-600 dark:text-gray-300">
-          {user.stripeOnboardingComplete
+          {stripeOnboardingComplete
             ? "Payouts are set up. Gifts land in your Stripe balance until you withdraw."
             : "Set up Stripe Connect so gifted money can be paid out to you."}
         </p>

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { getStripe } from "@/lib/stripe";
+import { getStripe, refreshStripeOnboardingStatus } from "@/lib/stripe";
 import { giftSchema } from "@/lib/validation";
 
 export async function POST(request: Request) {
@@ -36,7 +36,8 @@ export async function POST(request: Request) {
   }
 
   const owner = invite.family.owner;
-  if (!owner.stripeOnboardingComplete || !owner.stripeAccountId) {
+  const ownerOnboardingComplete = await refreshStripeOnboardingStatus(owner);
+  if (!ownerOnboardingComplete || !owner.stripeAccountId) {
     return NextResponse.json(
       { error: "This family hasn't finished setting up payouts yet" },
       { status: 422 }

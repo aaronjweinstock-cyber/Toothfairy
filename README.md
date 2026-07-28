@@ -187,6 +187,27 @@ https://docs.stripe.com/connect/accounts-v2/account-creation properly
 before implementing, rather than guessing at an API released after this
 was originally built.
 
+**Bigger discovery from live testing**: with "Accounts v1 support" on,
+account *creation* works, but this Stripe account's eventing has already
+moved to v2 regardless — it emits `v2.core.account.created`,
+`v2.core.account[configuration.recipient].capability_status_updated`, etc.,
+never the classic v1 `account.updated` event. That means the
+`account.updated` webhook handler in
+`src/app/api/stripe/webhook/route.ts` never fires for onboarding
+completion, no matter how the webhook endpoint is configured, since that
+event type simply isn't sent for this account anymore.
+
+**Workaround in place**: `refreshStripeOnboardingStatus()` in
+`src/lib/stripe.ts` checks the account directly via
+`stripe.accounts.retrieve()` (still available under v1 support) whenever
+the DB flag is stale, and self-heals it — called from the dashboard page
+and the gifts route. This means onboarding status is correct, just via
+polling-on-read instead of a push from Stripe. The real fix is still the
+full v2 migration above, which would also mean subscribing to v2 events
+(a different registration mechanism — `v2/core/event_destinations`, not
+the v1 `/v1/webhook_endpoints` used today) instead of working around their
+absence.
+
 ## Open questions still outstanding
 
 - **Data model**: still just the first draft in `prisma/schema.prisma`
