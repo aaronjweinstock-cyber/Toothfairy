@@ -168,6 +168,25 @@ migration, tooth photo upload, and invite email (gated). Deployed to Vercel
 - Resend stays off (`EMAIL_SENDING_ENABLED=false`) until a domain is bought
   and verified — not a blocker for deploying, just for that one feature.
 
+## Known follow-up: migrate Connect to Stripe's Accounts v2 API
+
+`src/app/api/stripe/connect/route.ts` uses `stripe.accounts.create({ type:
+"express", ... })` — the "Accounts v1" Connect API. Stripe now rejects this
+for new integrations by default (`StripeInvalidRequestError`: "Stripe no
+longer recommends Accounts v1 for new Connect integrations... Create
+connected accounts with POST /v2/core/accounts instead"). We're currently
+unblocked by turning on **Accounts v1 support** in the Stripe dashboard
+(Settings -> "Accounts v1 support" feature toggle) as a sanctioned
+compatibility path, not by changing code.
+
+That's fine short-term, but Accounts v2 is clearly the direction Stripe
+wants integrations to go, so this should be migrated before relying on
+this in production. The v2 API has a different shape (configuration
+objects instead of `type` + `capabilities`) — worth reading
+https://docs.stripe.com/connect/accounts-v2/account-creation properly
+before implementing, rather than guessing at an API released after this
+was originally built.
+
 ## Open questions still outstanding
 
 - **Data model**: still just the first draft in `prisma/schema.prisma`
