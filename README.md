@@ -23,6 +23,25 @@ decisions](#product-decisions) below.
   see "How it works" below.
 - Deploy target: Vercel.
 
+## Visual design
+
+- **Colors**: violet/indigo brand color + a gold accent for money-received
+  badges + a green "success" tone for completed payouts, defined as CSS
+  custom properties in `src/app/globals.css` (light + dark mode). Tailwind
+  v4's `@theme inline` block turns these into utilities like `bg-brand-500`,
+  `text-gold-600`, etc.
+- **Type**: Baloo 2 (rounded, friendly) for headings/display text, Inter for
+  body/forms — wired up in `src/app/layout.tsx` as `--font-display` /
+  `--font-body`.
+- **Icon**: a hand-drawn tooth + sparkle mark at `src/app/icon.svg` (also
+  Next.js's auto-favicon convention) and reused as the header logo via
+  `src/components/logo.tsx`.
+- **The "circle" visual**: `src/components/avatar.tsx` renders initials
+  avatars with a deterministic color per name, used both individually (next
+  to each kid/invite) and as an overlapping `AvatarStack` — the landing page
+  and the dashboard's "Invite your circle" header both use this to make the
+  closed-circle concept visible, not just described in text.
+
 ## Getting started
 
 1. Copy `.env.example` to `.env` and fill in the values:

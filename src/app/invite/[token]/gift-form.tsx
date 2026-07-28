@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 
+const inputClass =
+  "flex-1 rounded-xl border border-card-border bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-200";
+
 export function GiftForm({
   toothPostId,
   inviteToken,
@@ -50,14 +53,14 @@ export function GiftForm({
           name="senderName"
           placeholder="Your name"
           required
-          className="flex-1 rounded border border-black/10 px-3 py-2 text-sm dark:border-white/20"
+          className={inputClass}
         />
         <input
           name="senderEmail"
           type="email"
           placeholder="Your email"
           required
-          className="flex-1 rounded border border-black/10 px-3 py-2 text-sm dark:border-white/20"
+          className={inputClass}
         />
       </div>
       <div className="flex gap-2">
@@ -68,12 +71,12 @@ export function GiftForm({
           step="1"
           placeholder="Amount ($)"
           required
-          className="w-32 rounded border border-black/10 px-3 py-2 text-sm dark:border-white/20"
+          className={`w-32 ${inputClass}`}
         />
         <button
           type="submit"
           disabled={submitting}
-          className="rounded-full bg-foreground px-4 py-2 text-sm font-medium text-background disabled:opacity-50"
+          className="rounded-full bg-brand-500 px-4 py-2 text-sm font-display font-semibold text-white shadow-md shadow-brand-500/30 transition hover:bg-brand-600 disabled:opacity-50"
         >
           {submitting ? "Redirecting…" : "Send a gift"}
         </button>

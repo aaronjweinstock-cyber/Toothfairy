@@ -4,6 +4,10 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Logo } from "@/components/logo";
+
+const inputClass =
+  "w-full rounded-xl border border-card-border bg-card px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-200";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -50,56 +54,50 @@ export default function SignupPage() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center gap-6 px-6">
-      <h1 className="text-2xl font-semibold">Create your account</h1>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <label className="flex flex-col gap-1 text-sm">
-          Your name
-          <input
-            name="name"
-            required
-            className="rounded border border-black/10 px-3 py-2 dark:border-white/20"
-          />
-        </label>
-        <label className="flex flex-col gap-1 text-sm">
-          Family / kid name (e.g. &quot;Emma&apos;s Circle&quot;)
-          <input
-            name="familyName"
-            required
-            className="rounded border border-black/10 px-3 py-2 dark:border-white/20"
-          />
-        </label>
-        <label className="flex flex-col gap-1 text-sm">
-          Email
-          <input
-            name="email"
-            type="email"
-            required
-            className="rounded border border-black/10 px-3 py-2 dark:border-white/20"
-          />
-        </label>
-        <label className="flex flex-col gap-1 text-sm">
-          Password
-          <input
-            name="password"
-            type="password"
-            required
-            minLength={8}
-            className="rounded border border-black/10 px-3 py-2 dark:border-white/20"
-          />
-        </label>
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        <button
-          type="submit"
-          disabled={submitting}
-          className="rounded-full bg-foreground px-6 py-3 font-medium text-background disabled:opacity-50"
-        >
-          {submitting ? "Creating account…" : "Sign up"}
-        </button>
-      </form>
-      <p className="text-sm text-gray-600 dark:text-gray-300">
+    <main className="mx-auto flex min-h-screen max-w-sm flex-col justify-center gap-6 px-6 py-12">
+      <Link href="/" className="self-center">
+        <Logo />
+      </Link>
+      <div className="rounded-3xl border border-card-border bg-card p-8 shadow-sm">
+        <h1 className="font-display text-2xl font-bold text-foreground">
+          Create your account
+        </h1>
+        <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
+          <label className="flex flex-col gap-1.5 text-sm font-medium text-foreground">
+            Your name
+            <input name="name" required className={inputClass} />
+          </label>
+          <label className="flex flex-col gap-1.5 text-sm font-medium text-foreground">
+            Family / kid name (e.g. &quot;Emma&apos;s Circle&quot;)
+            <input name="familyName" required className={inputClass} />
+          </label>
+          <label className="flex flex-col gap-1.5 text-sm font-medium text-foreground">
+            Email
+            <input name="email" type="email" required className={inputClass} />
+          </label>
+          <label className="flex flex-col gap-1.5 text-sm font-medium text-foreground">
+            Password
+            <input
+              name="password"
+              type="password"
+              required
+              minLength={8}
+              className={inputClass}
+            />
+          </label>
+          {error && <p className="text-sm text-red-600">{error}</p>}
+          <button
+            type="submit"
+            disabled={submitting}
+            className="mt-2 rounded-full bg-brand-500 px-6 py-3 font-display font-semibold text-white shadow-md shadow-brand-500/30 transition hover:bg-brand-600 disabled:opacity-50"
+          >
+            {submitting ? "Creating account…" : "Sign up"}
+          </button>
+        </form>
+      </div>
+      <p className="text-center text-sm text-muted">
         Already have an account?{" "}
-        <Link href="/login" className="underline">
+        <Link href="/login" className="font-medium text-brand-600 underline">
           Log in
         </Link>
       </p>

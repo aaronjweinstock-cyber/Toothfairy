@@ -18,7 +18,7 @@ export function SendInviteButton({
       <button
         type="button"
         disabled={isPending}
-        className="text-xs underline disabled:opacity-50"
+        className="text-xs font-medium text-brand-600 underline disabled:opacity-50"
         onClick={() => {
           startTransition(async () => {
             setResult(await sendInvite(familyId, inviteId));
@@ -28,7 +28,7 @@ export function SendInviteButton({
         {isPending ? "Sending…" : "Send invite"}
       </button>
       {result && (
-        <span className="text-right text-xs text-gray-500">
+        <span className="text-right text-xs text-muted">
           {result.sent
             ? "Email sent!"
             : "Email sending isn't set up yet — copy the link above."}
