@@ -101,7 +101,7 @@ export default async function OverviewPage() {
                   className="flex items-center gap-4 rounded-2xl border border-card-border bg-card p-4"
                 >
                   <Avatar label={post.childName} />
-                  <p className="flex-1 text-sm text-foreground">
+                  <p className="min-w-0 flex-1 break-words text-sm text-foreground">
                     <span className="font-medium">{post.childName}</span>{" "}
                     {post.note ? `— ${post.note}` : "lost a tooth"}
                   </p>

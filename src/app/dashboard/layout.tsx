@@ -29,13 +29,13 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="flex min-h-screen">
+    <div className="min-h-screen lg:flex">
       <Sidebar
         familyName={family.name}
         userEmail={user.email}
         signOutAction={signOutAction}
       />
-      <main className="flex-1 px-8 py-10 lg:px-12">
+      <main className="min-w-0 flex-1 px-4 py-6 sm:px-8 sm:py-10 lg:px-12">
         <div className="mx-auto max-w-5xl">{children}</div>
       </main>
     </div>

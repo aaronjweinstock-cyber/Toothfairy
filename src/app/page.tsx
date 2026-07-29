@@ -10,7 +10,7 @@ export default function Home() {
       </div>
 
       <div className="flex flex-col gap-4">
-        <h1 className="font-display text-5xl font-bold tracking-tight text-foreground">
+        <h1 className="font-display text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
           Toothfairy
         </h1>
         <p className="text-lg text-muted">
@@ -25,7 +25,7 @@ export default function Home() {
         <span className="text-sm text-muted">your circle, invited by name</span>
       </div>
 
-      <div className="flex gap-4">
+      <div className="flex flex-wrap justify-center gap-4">
         <Link
           href="/signup"
           className="rounded-full bg-brand-500 px-6 py-3 font-display font-semibold text-white shadow-md shadow-brand-500/30 transition hover:bg-brand-600"

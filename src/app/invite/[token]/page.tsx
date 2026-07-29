@@ -56,10 +56,10 @@ export default async function InvitePage({
               key={post.id}
               className="flex flex-col gap-4 rounded-3xl border border-card-border bg-card p-6"
             >
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-3">
                   <Avatar label={child.name} size="lg" />
-                  <h2 className="font-display text-lg font-bold text-foreground">
+                  <h2 className="min-w-0 break-words font-display text-lg font-bold text-foreground">
                     {child.name} lost a tooth
                     {post.note ? ` — ${post.note}` : ""}
                   </h2>

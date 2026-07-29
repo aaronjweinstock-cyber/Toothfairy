@@ -6,7 +6,7 @@ import { Avatar } from "@/components/avatar";
 import { addChild, addToothPost } from "../actions";
 
 const inputClass =
-  "flex-1 rounded-xl border border-card-border bg-card px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-200";
+  "w-full sm:flex-1 rounded-xl border border-card-border bg-card px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-200";
 
 export default async function KidsPage() {
   const session = await auth();
@@ -58,7 +58,7 @@ export default async function KidsPage() {
             className="flex flex-col gap-2"
           >
             <input type="hidden" name="childId" value={child.id} />
-            <div className="flex gap-2">
+            <div className="flex flex-col gap-2 sm:flex-row">
               <input
                 name="note"
                 placeholder="Lost a tooth! (optional note)"
@@ -88,8 +88,8 @@ export default async function KidsPage() {
                   key={post.id}
                   className="flex flex-col gap-2 rounded-2xl bg-brand-50 p-4 text-sm"
                 >
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="text-foreground">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="min-w-0 break-words text-foreground">
                       {post.note || "Lost a tooth"}
                     </span>
                     <span className="whitespace-nowrap rounded-full bg-gold-500/20 px-3 py-1 font-display text-xs font-bold text-gold-600">
@@ -116,7 +116,7 @@ export default async function KidsPage() {
 
       <form
         action={addChild.bind(null, family.id)}
-        className="flex gap-2 rounded-3xl border border-dashed border-card-border p-5"
+        className="flex flex-col gap-2 rounded-3xl border border-dashed border-card-border p-5 sm:flex-row"
       >
         <input
           name="name"

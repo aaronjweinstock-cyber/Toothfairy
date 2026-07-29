@@ -12,7 +12,7 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 const inputClass =
-  "flex-1 rounded-xl border border-card-border bg-card px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-200";
+  "w-full sm:flex-1 rounded-xl border border-card-border bg-card px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-200";
 
 export default async function InvitesPage() {
   const session = await auth();
@@ -54,7 +54,10 @@ export default async function InvitesPage() {
           this circle and send gifts &mdash; there&apos;s no public link.
         </p>
 
-        <form action={createInvite.bind(null, family.id)} className="flex gap-2">
+        <form
+          action={createInvite.bind(null, family.id)}
+          className="flex flex-col gap-2 sm:flex-row"
+        >
           <input
             name="email"
             type="email"
@@ -74,20 +77,20 @@ export default async function InvitesPage() {
           {family.invites.map((invite) => (
             <li
               key={invite.id}
-              className="flex items-center justify-between gap-3 rounded-2xl bg-brand-50 p-4 text-sm"
+              className="flex flex-col gap-3 rounded-2xl bg-brand-50 p-4 text-sm sm:flex-row sm:items-center sm:justify-between"
             >
-              <div className="flex items-center gap-3">
+              <div className="flex min-w-0 items-center gap-3">
                 <Avatar label={invite.email} size="sm" />
-                <div>
-                  <div className="text-foreground">{invite.email}</div>
+                <div className="min-w-0">
+                  <div className="truncate text-foreground">{invite.email}</div>
                   {invite.status === "PENDING" && (
-                    <code className="text-xs break-all text-muted">
+                    <code className="block text-xs break-all text-muted">
                       {appUrl}/invite/{invite.token}
                     </code>
                   )}
                 </div>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 <span
                   className={`whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-wide ${
                     STATUS_STYLES[invite.status] ?? STATUS_STYLES.REVOKED

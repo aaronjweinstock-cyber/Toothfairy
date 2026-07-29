@@ -51,9 +51,16 @@ is its own route (`src/app/dashboard/{page,kids,invites,payments}/page.tsx`)
 sharing that layout. Server actions in `src/app/dashboard/actions.ts` call
 `revalidatePath("/dashboard", "layout")` so a mutation on one page (e.g.
 adding a tooth post) keeps every dashboard page's data fresh, not just the
-one you're on. **Not yet responsive** — the sidebar is a fixed width with no
-mobile collapse/hamburger; worth addressing before this needs to work well
-on a phone.
+one you're on. **Responsive**: below the `lg` breakpoint the sidebar becomes
+an off-canvas drawer (hamburger button in a mobile top bar, slide-in panel
+with backdrop, closes on navigation) instead of a persistent column — see
+the mobile-specific classes in `src/components/sidebar.tsx`. Every form/list
+row that used a fixed-width `flex` row on desktop switches to stacking
+(`flex-col` → `sm:flex-row`) on narrow screens, with `min-w-0`/`truncate`
+where needed so long emails or invite links don't force horizontal
+scrolling. Verified on a 390px-wide viewport (iPhone-sized) with zero
+horizontal overflow across landing, auth, all four dashboard pages, and the
+public invite/gift page.
 
 ## Getting started
 

@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 const inputClass =
-  "flex-1 rounded-xl border border-card-border bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-200";
+  "w-full sm:flex-1 rounded-xl border border-card-border bg-background px-3.5 py-2.5 text-sm text-foreground placeholder:text-muted focus:border-brand-400 focus:outline-none focus:ring-2 focus:ring-brand-200";
 
 export function GiftForm({
   toothPostId,
@@ -48,7 +48,7 @@ export function GiftForm({
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-2">
-      <div className="flex gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row">
         <input
           name="senderName"
           placeholder="Your name"
@@ -63,7 +63,7 @@ export function GiftForm({
           className={inputClass}
         />
       </div>
-      <div className="flex gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row">
         <input
           name="amount"
           type="number"
@@ -71,7 +71,7 @@ export function GiftForm({
           step="1"
           placeholder="Amount ($)"
           required
-          className={`w-32 ${inputClass}`}
+          className={`w-full sm:w-32 ${inputClass}`}
         />
         <button
           type="submit"
